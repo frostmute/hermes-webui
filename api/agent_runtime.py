@@ -9,6 +9,7 @@ mixed runtime and require a clean WebUI restart instead.
 from __future__ import annotations
 
 from pathlib import Path
+import os
 import sys
 import subprocess
 import threading
@@ -142,6 +143,7 @@ def ensure_agent_runtime_current() -> None:
 def require_ai_agent_class():
     """Import ``AIAgent`` after proving the loaded source revision is current."""
     ensure_agent_runtime_current()
+    os.environ.setdefault("HERMES_DISABLE_LAZY_INSTALLS", "1")
     from run_agent import AIAgent  # noqa: PLC0415
 
     _capture_loaded_agent_revision()

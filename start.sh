@@ -49,6 +49,7 @@ if [[ -f "${REPO_ROOT}/.env" ]]; then
   rm -f "${_hermes_env_filtered}"
   unset _hermes_env_filtered
 fi
+export HERMES_DISABLE_LAZY_INSTALLS="${HERMES_DISABLE_LAZY_INSTALLS:-1}"
 
 PYTHON="${HERMES_WEBUI_PYTHON:-}"
 if [[ -z "${PYTHON}" ]]; then

@@ -16,6 +16,9 @@ _SIGPIPE = getattr(signal, "SIGPIPE", None)
 if _SIGPIPE is not None:
     signal.signal(_SIGPIPE, signal.SIG_IGN)
 
+# Prevent hermes-agent bootstrap from hijacking in-process execution via os.execv.
+os.environ.setdefault("HERMES_DISABLE_LAZY_INSTALLS", "1")
+
 # Test-mode network isolation keeps subprocess-backed tests hermetic.
 if os.environ.get("HERMES_WEBUI_TEST_NETWORK_BLOCK", "").strip() in ("1", "true", "yes"):
     _REAL_CREATE_CONN = socket.create_connection

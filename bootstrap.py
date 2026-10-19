@@ -72,6 +72,7 @@ def _load_repo_dotenv() -> None:
 # Must run before DEFAULT_HOST / DEFAULT_PORT so os.getenv() picks up
 # values from .env even when bootstrap.py is invoked directly (not via start.sh).
 _load_repo_dotenv()
+os.environ.setdefault("HERMES_DISABLE_LAZY_INSTALLS", "1")
 
 DEFAULT_HOST = os.getenv("HERMES_WEBUI_HOST", "127.0.0.1")
 DEFAULT_PORT = int(os.getenv("HERMES_WEBUI_PORT", "8787"))
@@ -252,6 +253,7 @@ def discover_launcher_python(agent_dir: Path | None) -> str:
 def _python_can_run_webui_and_agent(python_exe: str, agent_dir: Path | None = None) -> bool:
     script = "import yaml\nfrom run_agent import AIAgent\n"
     env = os.environ.copy()
+    env.setdefault("HERMES_DISABLE_LAZY_INSTALLS", "1")
     if agent_dir:
         # PREPEND agent_dir to PYTHONPATH so an `agent_dir/run_agent.py` wins
         # over any stale `run_agent` package in system site-packages (sys.path
@@ -583,6 +585,7 @@ def main() -> int:
     os.environ.setdefault("HERMES_WEBUI_STATE_DIR", str(state_dir))
     if agent_dir:
         os.environ["HERMES_WEBUI_AGENT_DIR"] = str(agent_dir)
+    os.environ.setdefault("HERMES_DISABLE_LAZY_INSTALLS", "1")
 
     # Let operators move fallback relative writes out of a read-only agent dir.
     server_cwd = os.environ.get("HERMES_WEBUI_SERVER_CWD", "").strip() or str(agent_dir or REPO_ROOT)

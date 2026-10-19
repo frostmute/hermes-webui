@@ -430,6 +430,7 @@ start_cmd() {
   _load_hermes_dotenv
   export HERMES_WEBUI_STATE_DIR="${HERMES_WEBUI_STATE_DIR:-${DEFAULT_STATE_DIR}}"
   mkdir -p "${HERMES_WEBUI_STATE_DIR}"
+  export HERMES_DISABLE_LAZY_INSTALLS="${HERMES_DISABLE_LAZY_INSTALLS:-1}"
   _parse_launch_binding "$@"
   _build_bootstrap_args "$@"
   export HERMES_WEBUI_HOST="${CTL_HOST}"
@@ -548,6 +549,14 @@ status_cmd() {
     echo "  Uptime:  ${uptime:-unknown}"
     echo "  Bound:   ${host}:${port}"
     echo "  Log:     ${log_path}"
+    echo "  Health:  ${health}"
+  elif pid="$(_launchd_webui_pid 2>/dev/null)"; then
+    uptime="$(ps -p "${pid}" -o etime= 2>/dev/null | sed 's/^ *//' || true)"
+    health="$(_health_line "${host}" "${port}")"
+    echo "● hermes-webui — running (launchd)"
+    echo "  PID:     ${pid}"
+    echo "  Uptime:  ${uptime:-unknown}"
+    echo "  Bound:   ${host}:${port}"
     echo "  Health:  ${health}"
   else
     [[ -f "${PID_FILE}" ]] && _clear_stale_pid >/dev/null 2>&1 || true

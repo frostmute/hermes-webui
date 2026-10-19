@@ -1497,13 +1497,21 @@ def _cron_jobs_cross_profile(active_profile: str) -> tuple[list[dict], list[dict
     other_jobs: list[dict] = []
     seen_homes: set[str] = set()
     for owner_profile in names:
-        home = Path(get_hermes_home_for_profile(owner_profile))
-        home_key = _home_key(home)
-        if home_key in seen_homes:
-            continue
-        seen_homes.add(home_key)
         is_active = _profiles_match(owner_profile, active_profile)
         try:
+            # Profile homes may resolve outside ~/.hermes/profiles (e.g. the
+            # Pantheon agents live at workspace/Pantheon/agents/<name> and are
+            # symlinked into profiles/). Containment is enforced elsewhere
+            # (clone/delete paths); here we just need the real on-disk home so
+            # cron_profile_context_for_home can pin HERMES_HOME correctly. A
+            # foreign profile that fails to resolve (missing dir, broken
+            # symlink, malformed name) is skipped silently; an active-profile
+            # failure still bubbles up so we don't hide real bugs.
+            home = Path(get_hermes_home_for_profile(owner_profile))
+            home_key = _home_key(home)
+            if home_key in seen_homes:
+                continue
+            seen_homes.add(home_key)
             with cron_profile_context_for_home(home):
                 jobs = _cron_jobs_for_api(list_jobs(include_disabled=True))
         except Exception:
